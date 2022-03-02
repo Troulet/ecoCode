@@ -28,37 +28,51 @@ import io.ecocode.xml.XmlSensor;
 import org.sonar.api.Plugin;
 import org.sonar.api.config.PropertyDefinition;
 import org.sonar.api.resources.Qualifiers;
+import org.sonar.plugins.groovy.GroovySensor;
+import org.sonar.plugins.groovy.cobertura.CoberturaSensor;
+import org.sonar.plugins.groovy.codenarc.CodeNarcSensor;
+import org.sonar.plugins.groovy.foundation.Groovy;
+import org.sonar.plugins.groovy.jacoco.JaCoCoExtensions;
+import org.sonar.plugins.groovy.surefire.GroovySurefireSensor;
 
 /**
  * Entry point of your plugin containing your custom rules
  */
 public class EcoCodeRulesPlugin implements Plugin {
 
-  public static final String FILE_SUFFIXES_KEY = "ecocode.xml.file.suffixes";
+    public static final String FILE_SUFFIXES_KEY = "ecocode.xml.file.suffixes";
 
-  @Override
-  public void define(Context context) {
+    @Override
+    public void define(Context context) {
 
-    // ===Add Java rules extension ===
-    // server extensions -> objects are instantiated during server startup
-    context.addExtension(JavaRulesDefinition.class);
-    // batch extensions -> objects are instantiated during code analysis
-    context.addExtension(JavaFileCheckRegistrar.class);
-    // === Add Java rules profile ===
-    context.addExtension(JavaEcoCodeProfile.class);
-    // === Add XML rules extension ===
-    context.addExtensions(
-            PropertyDefinition.builder(FILE_SUFFIXES_KEY)
-                    .name("File suffixes")
-                    .description("Comma-separated list of suffixes for files to analyze.")
-                    .defaultValue(".xml,.xsd,.xsl")
-                    .multiValues(true)
-                    .category("XML")
-                    .onQualifiers(Qualifiers.PROJECT)
-                    .build(),
-            XmlRulesDefinition.class,
-            XmlEcoCodeProfile.class,
-            XmlSensor.class);
-  }
+        // ===Add Java rules extension ===
+        // server extensions -> objects are instantiated during server startup
+        context.addExtension(JavaRulesDefinition.class);
+        // batch extensions -> objects are instantiated during code analysis
+        context.addExtension(JavaFileCheckRegistrar.class);
+        // === Add Java rules profile ===
+        context.addExtension(JavaEcoCodeProfile.class);
+        // === Add XML rules extension ===
+        context.addExtensions(
+                PropertyDefinition.builder(FILE_SUFFIXES_KEY)
+                        .name("File suffixes")
+                        .description("Comma-separated list of suffixes for files to analyze.")
+                        .defaultValue(".xml,.xsd,.xsl")
+                        .multiValues(true)
+                        .category("XML")
+                        .onQualifiers(Qualifiers.PROJECT)
+                        .build(),
+                XmlRulesDefinition.class,
+                XmlEcoCodeProfile.class,
+                XmlSensor.class);
+        // === Add Codenarc-Groovy rules extension ===
+        context.addExtensions(
+                Groovy.getExtensions(),
+                GroovySensor.getExtensions(),
+                CodeNarcSensor.getExtensions(),
+                GroovySurefireSensor.getExtensions(),
+                CoberturaSensor.getExtensions(),
+                JaCoCoExtensions.getExtensions());
+    }
 
 }
